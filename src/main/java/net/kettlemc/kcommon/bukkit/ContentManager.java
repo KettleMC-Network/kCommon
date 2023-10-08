@@ -1,4 +1,4 @@
-package net.kettlemc.example;
+package net.kettlemc.kcommon.bukkit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -7,6 +7,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A utility class for registering commands and listeners.
+ */
 public final class ContentManager {
 
     private final @NotNull JavaPlugin plugin;
