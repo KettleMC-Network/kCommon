@@ -5,6 +5,9 @@ import net.luckperms.api.model.user.User;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A utility class for LuckPerms operations.
+ */
 public class LuckPermsUtil {
 
     private LuckPermsUtil() {

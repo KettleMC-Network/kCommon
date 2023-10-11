@@ -14,6 +14,11 @@ public final class ContentManager {
 
     private final @NotNull JavaPlugin plugin;
 
+    /**
+     * Creates a new ContentManager.
+     *
+     * @param plugin The plugin to register commands and listeners for.
+     */
     public ContentManager(@NotNull JavaPlugin plugin) {
         this.plugin = plugin;
     }
