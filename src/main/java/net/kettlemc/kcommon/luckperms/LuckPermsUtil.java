@@ -1,14 +1,11 @@
 package net.kettlemc.kcommon.luckperms;
 
-import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class LuckPermsUtil {
-
-    private static final LuckPerms luckperms = LuckPermsProvider.get();
 
     private LuckPermsUtil() {
     }
@@ -20,7 +17,7 @@ public class LuckPermsUtil {
      * @return The LuckPerms prefix of the player or an empty string if the player is not found.
      */
     public static @NotNull String getLuckPermsPrefix(@NotNull Player player) {
-        User user = luckperms.getUserManager().getUser(player.getUniqueId());
+        User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
         if (user == null) {
             return "";
         }
@@ -35,7 +32,7 @@ public class LuckPermsUtil {
      * @return The LuckPerms suffix of the player or an empty string  if the player is not found.
      */
     public static @NotNull String getLuckPermsSuffix(@NotNull Player player) {
-        User user = luckperms.getUserManager().getUser(player.getUniqueId());
+        User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
         if (user == null) {
             return "";
         }
