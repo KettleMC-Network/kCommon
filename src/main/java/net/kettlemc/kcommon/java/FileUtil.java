@@ -42,6 +42,7 @@ public class FileUtil {
     public static boolean saveResourceAsFile(@NotNull URL resource, @NotNull Path output) {
         try {
             InputStream in = resource.openStream();
+            output.toFile().getParentFile().mkdirs();
             Files.copy(in, output);
             in.close();
             return true;
