@@ -85,7 +85,7 @@ publishing {
             pom {
                 name.set("kcommon")
                 description.set("Common utils and methods for KettleMC plugins")
-                url.set("https://github.com/UeberallGebannt/kCommon")
+                url.set("https://github.com/KettleMC-Network/kCommon")
 
                 licenses {
                     license {
