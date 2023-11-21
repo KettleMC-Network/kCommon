@@ -1,4 +1,4 @@
-package net.kettlemc.kcommon.adventure;
+package net.kettlemc.kcommon.language;
 
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
