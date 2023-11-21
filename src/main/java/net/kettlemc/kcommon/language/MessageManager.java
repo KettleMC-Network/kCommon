@@ -9,6 +9,9 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * A utility class for sending messages.
+ */
 public class MessageManager {
 
     private final AdventureMessage prefix;
