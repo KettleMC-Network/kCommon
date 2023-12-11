@@ -2,6 +2,7 @@ package net.kettlemc.kcommon.data;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -35,6 +36,13 @@ public interface DataHandler<T> {
      * @return a future containing the entity
      */
     Future<T> load(@NotNull String uuid, boolean createIfNotExists);
+
+    /**
+     * Loads all entities from the database
+     *
+     * @return a future containing a list of all entities
+     */
+    Future<List<T>> loadAll();
 
     /**
      * Initializes the data handler

@@ -5,4 +5,5 @@ dependencies {
     implementation "org.hibernate:hibernate-core:5.6.15.Final"
     implementation "io.github.almighty-satan.slams:slams-minimessage:1.0.0"
     implementation "net.kettlemc.klanguage:klanguage-core:1.0.0"
+    implementation "com.github.gwenn:sqlite-dialect:0.1.4"
 }

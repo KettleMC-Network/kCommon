@@ -4,8 +4,12 @@ import net.kettlemc.kcommon.java.Provider;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
 
+import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -16,15 +20,16 @@ import java.util.concurrent.Future;
  */
 public class HibernateDataHandler<T> implements DataHandler<T> {
 
-    private final Class<?> type;
-    private final String sqlHost;
-    private final String sqlPort;
-    private final String sqlDatabase;
-    private final String sqlUser;
-    private final String sqlPassword;
-    private final Provider<T> defaultEntityProvider;
-    private SessionFactory sessionFactory;
-    private DataThreadHandler dataThreadHandler;
+    protected final Class<?> type;
+    protected final String sqlHost;
+    protected final String sqlPort;
+    protected final String sqlDatabase;
+    protected final String sqlUser;
+    protected final String sqlPassword;
+    protected final Provider<T> defaultEntityProvider;
+    protected SessionFactory sessionFactory;
+    protected DataThreadHandler dataThreadHandler;
+    private String tableNameFormat = "%s";
 
     /**
      * Creates a new HibernateDataHandler
@@ -45,6 +50,11 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
         this.sqlDatabase = sqlDatabase;
         this.sqlUser = sqlUser;
         this.sqlPassword = sqlPassword;
+    }
+
+    public HibernateDataHandler<T> setTableNameFormat(String tableNameFormat) {
+        this.tableNameFormat = tableNameFormat;
+        return this;
     }
 
     @Override
@@ -68,6 +78,27 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
     @Override
     public Future<T> load(@NotNull String uuid) {
         return load(uuid, true);
+    }
+
+    public Future<List<T>> loadAll() {
+        CompletableFuture<List<T>> future = new CompletableFuture<>();
+        this.dataThreadHandler.queue(() -> {
+            Session session = this.sessionFactory.openSession();
+            session.beginTransaction();
+            if (this.type.isAnnotationPresent(Table.class))
+                return;
+
+            String table = this.type.getAnnotation(Table.class).name();
+
+            List<T> entities = session.createQuery("SELECT * FROM " + table + ";").list();
+            if (entities == null || entities.isEmpty()) {
+                entities = new ArrayList<>();
+            }
+            session.getTransaction().commit();
+            session.close();
+            future.complete(entities);
+        });
+        return future;
     }
 
     @Override
@@ -97,7 +128,7 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
     @Override
     public boolean initialize() {
         try {
-            this.sessionFactory = new org.hibernate.cfg.Configuration()
+            Configuration configuration = new Configuration()
                     .setProperty("hibernate.connection.url", "jdbc:mysql://" + this.sqlHost + ":" + this.sqlPort + "/" + this.sqlDatabase + "?useSSL=false")
                     .setProperty("hibernate.connection.username", this.sqlUser)
                     .setProperty("hibernate.connection.password", this.sqlPassword)
@@ -107,8 +138,12 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
                     .setProperty("hibernate.hbm2ddl.auto", "update")
                     .setProperty("hibernate.connection.pool_size", "1")
                     .setProperty("hibernate.current_session_context_class", "thread")
-                    .addAnnotatedClass(this.type)
-                    .buildSessionFactory();
+                    .addAnnotatedClass(this.type);
+
+            configuration.setImplicitNamingStrategy(DynamicNamingStrategy.of(this.tableNameFormat));
+
+            this.sessionFactory = configuration.buildSessionFactory();
+
             this.dataThreadHandler = new DataThreadHandler();
             this.dataThreadHandler.init();
             return true;
