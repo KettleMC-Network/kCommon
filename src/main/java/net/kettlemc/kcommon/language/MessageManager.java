@@ -39,18 +39,7 @@ public class MessageManager {
      * @param message The message to send
      */
     public void sendMessage(CommandSender sender, AdventureMessage message) {
-        sendMessage(sender, message, true, null, null);
-    }
-
-    /**
-     * Sends an adventure message to the sender
-     *
-     * @param sender    The sender to send the message to (can be a player or console)
-     * @param message   The message to send
-     * @param usePrefix Whether to prefix the message with the prefix
-     */
-    public void sendMessage(CommandSender sender, AdventureMessage message, boolean usePrefix) {
-        sendMessage(sender, message, usePrefix, null, null);
+        sendMessage(sender, message, true);
     }
 
     /**
@@ -62,6 +51,28 @@ public class MessageManager {
      */
     public void sendMessage(CommandSender target, AdventureMessage message, Placeholder... placeholders) {
         sendMessage(target, message, true, null, null, placeholders);
+    }
+
+    /**
+     * Sends an adventure message to the sender
+     *
+     * @param sender    The sender to send the message to (can be a player or console)
+     * @param message   The message to send
+     * @param usePrefix Whether to prefix the message with the prefix
+     */
+    public void sendMessage(CommandSender sender, AdventureMessage message, boolean usePrefix) {
+        sendMessage(sender, message, usePrefix, new Placeholder[0]);
+    }
+
+    /**
+     * Sends an adventure message to the sender
+     *
+     * @param sender    The sender to send the message to (can be a player or console)
+     * @param message   The message to send
+     * @param usePrefix Whether to prefix the message with the prefix
+     */
+    public void sendMessage(CommandSender sender, AdventureMessage message, boolean usePrefix, Placeholder... placeholders) {
+        sendMessage(sender, message, usePrefix, null, null, placeholders);
     }
 
     /**
