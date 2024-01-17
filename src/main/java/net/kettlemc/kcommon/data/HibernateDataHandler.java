@@ -140,7 +140,7 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
                     .setProperty("hibernate.current_session_context_class", "thread")
                     .addAnnotatedClass(this.type);
 
-            configuration.setImplicitNamingStrategy(DynamicNamingStrategy.of(this.tableNameFormat));
+            // TODO: configuration.setImplicitNamingStrategy(DynamicNamingStrategy.of(this.tableNameFormat));
 
             this.sessionFactory = configuration.buildSessionFactory();
 
