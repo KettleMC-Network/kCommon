@@ -2,7 +2,9 @@ package net.kettlemc.kcommon.java;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * A utility class for String operations.
@@ -60,4 +62,15 @@ public final class StringUtil {
     public static String currentDate() {
         return currentDate("yyyy-MM-dd_HH-mm-ss");
     }
+
+    /**
+     * Removes all emojis from the given String
+     *
+     * @param input The String to remove emojis from
+     * @return The String without emojis
+     */
+    public static String stripEmojis(String input) {
+        return input.replaceAll("[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]", "");
+    }
+
 }
