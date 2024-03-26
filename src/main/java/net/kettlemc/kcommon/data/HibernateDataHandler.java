@@ -43,21 +43,6 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
      * @param sqlUser               the sql user
      * @param sqlPassword           the sql password
      */
-    public HibernateDataHandler(Class<?> type, Provider<T> defaultEntityProvider, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
-        this(type, (Function<String, T>) s -> defaultEntityProvider.get(), sqlHost, sqlPort, sqlDatabase, sqlUser, sqlPassword);
-    }
-
-    /**
-     * Creates a new HibernateDataHandler
-     *
-     * @param type                  the type of entity
-     * @param defaultEntityProvider a provider for the default entity
-     * @param sqlHost               the sql host
-     * @param sqlPort               the sql port
-     * @param sqlDatabase           the sql database
-     * @param sqlUser               the sql user
-     * @param sqlPassword           the sql password
-     */
     public HibernateDataHandler(Class<?> type, Function<String, T> defaultEntityProvider, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
         this.type = type;
         this.defaultEntityProvider = defaultEntityProvider;
