@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 /**
  * A data handler that uses Hibernate to save and load entities
@@ -26,7 +27,7 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
     protected final String sqlDatabase;
     protected final String sqlUser;
     protected final String sqlPassword;
-    protected final Provider<T> defaultEntityProvider;
+    protected final Function<String, T> defaultEntityProvider;
     protected SessionFactory sessionFactory;
     protected DataThreadHandler dataThreadHandler;
     private String tableNameFormat = "%s";
@@ -43,6 +44,21 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
      * @param sqlPassword           the sql password
      */
     public HibernateDataHandler(Class<?> type, Provider<T> defaultEntityProvider, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
+        this(type, (Function<String, T>) s -> defaultEntityProvider.get(), sqlHost, sqlPort, sqlDatabase, sqlUser, sqlPassword);
+    }
+
+    /**
+     * Creates a new HibernateDataHandler
+     *
+     * @param type                  the type of entity
+     * @param defaultEntityProvider a provider for the default entity
+     * @param sqlHost               the sql host
+     * @param sqlPort               the sql port
+     * @param sqlDatabase           the sql database
+     * @param sqlUser               the sql user
+     * @param sqlPassword           the sql password
+     */
+    public HibernateDataHandler(Class<?> type, Function<String, T> defaultEntityProvider, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
         this.type = type;
         this.defaultEntityProvider = defaultEntityProvider;
         this.sqlHost = sqlHost;
@@ -110,7 +126,7 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
             @SuppressWarnings("unchecked")
             T entity = (T) session.get(this.type, uuid);
             if (entity == null && createIfNotExists) {
-                entity = this.defaultEntityProvider.get();
+                entity = this.defaultEntityProvider.apply(uuid);
                 session.saveOrUpdate(entity);
             }
             session.getTransaction().commit();
