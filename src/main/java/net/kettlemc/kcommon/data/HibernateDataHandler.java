@@ -1,6 +1,5 @@
 package net.kettlemc.kcommon.data;
 
-import net.kettlemc.kcommon.java.Provider;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -30,7 +29,6 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
     protected final Function<String, T> defaultEntityProvider;
     protected SessionFactory sessionFactory;
     protected DataThreadHandler dataThreadHandler;
-    private String tableNameFormat = "%s";
 
     /**
      * Creates a new HibernateDataHandler
@@ -43,7 +41,7 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
      * @param sqlUser               the sql user
      * @param sqlPassword           the sql password
      */
-    public HibernateDataHandler(Class<?> type, Function<String, T> defaultEntityProvider, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
+    public HibernateDataHandler(Class<T> type, Function<String, T> defaultEntityProvider, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
         this.type = type;
         this.defaultEntityProvider = defaultEntityProvider;
         this.sqlHost = sqlHost;
@@ -51,11 +49,6 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
         this.sqlDatabase = sqlDatabase;
         this.sqlUser = sqlUser;
         this.sqlPassword = sqlPassword;
-    }
-
-    public HibernateDataHandler<T> setTableNameFormat(String tableNameFormat) {
-        this.tableNameFormat = tableNameFormat;
-        return this;
     }
 
     @Override
