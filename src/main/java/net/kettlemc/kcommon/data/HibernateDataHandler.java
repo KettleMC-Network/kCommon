@@ -123,7 +123,7 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
     public boolean initialize() {
         try {
             Configuration configuration = new Configuration()
-                    .setProperty("hibernate.connection.url", "jdbc:mysql://" + this.sqlHost + ":" + this.sqlPort + "/" + this.sqlDatabase + "?useSSL=false")
+                    .setProperty("hibernate.connection.url", "jdbc:mysql://" + this.sqlHost + ":" + this.sqlPort + "/" + this.sqlDatabase + "?useSSL=true")
                     .setProperty("hibernate.connection.username", this.sqlUser)
                     .setProperty("hibernate.connection.password", this.sqlPassword)
                     .setProperty("hibernate.connection.driver_class", "com.mysql.cj.jdbc.Driver")
