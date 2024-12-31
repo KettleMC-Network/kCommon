@@ -7,6 +7,7 @@ public enum ServerSoftware {
     KETTING("org.kettingpowered.ketting.config.KettingConfig", "Ketting"),
     MAGMA_1_18("org.magmafoundation.magma.helpers.EnumJ17Helper", "Magma"),
     MAGMA_1_12("org.magmafoundation.magma.Magma", "Magma"),
+    CATSERVER("catserver.server.CatServer", "CatServer"),
     CRUCIBLE( "io.github.crucible.Crucible", "Crucible"),
     URANIUM(null, "Uranium"),
     THERMOS("thermos.Thermos", "Thermos"),
