@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 /**
  * Represents each Minecraft protocol version.
+ * Taken from <a href="https://minecraft.wiki/w/Protocol_version">minecraft.wiki</a>
  */
 public enum MinecraftVersion {
     UNKNOWN(-1, "Unknown"),
@@ -77,7 +78,14 @@ public enum MinecraftVersion {
     MINECRAFT_1_20_1(763, "1.20.1"),
     MINECRAFT_1_20_2(764, "1.20.2"),
     MINECRAFT_1_20_3(765, "1.20.3"),
-    MINECRAFT_1_20_4(765, "1.20.4");
+    MINECRAFT_1_20_4(765, "1.20.4"),
+    MINECRAFT_1_20_5(766, "1.20.5"),
+    MINECRAFT_1_20_6(766, "1.20.6"),
+    MINECRAFT_1_21(767, "1.21"),
+    MINECRAFT_1_21_1(767, "1.21.1"),
+    MINECRAFT_1_21_2(768, "1.21.2"),
+    MINECRAFT_1_21_3(768, "1.21.3"),
+    MINECRAFT_1_21_4(769, "1.21.4");
 
     /**
      * Represents the lowest supported version.
