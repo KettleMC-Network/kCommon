@@ -1,19 +1,20 @@
 package net.kettlemc.kcommon.data;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A thread handler for data operations containing a queue.
  */
 public class DataThreadHandler {
 
+    private static final Logger LOGGER = Logger.getLogger(DataThreadHandler.class.getName());
+
     private BlockingQueue<Runnable> taskQueue;
     private ExecutorService executorService;
-
-    private Thread taskProcessingThread;
+    private AtomicBoolean running;
 
     /**
      * Initializes the DataThreadHandler by creating a new task queue and executor service.
@@ -22,22 +23,23 @@ public class DataThreadHandler {
         if (taskQueue != null || executorService != null) {
             throw new IllegalStateException("DataThreadHandler already initialized!");
         }
-        this.taskQueue = new LinkedBlockingQueue<>();
-        this.executorService = Executors.newSingleThreadExecutor();
 
-        this.taskProcessingThread = new Thread(() -> {
-            while (true) {
+        taskQueue = new LinkedBlockingQueue<>();
+        executorService = Executors.newSingleThreadExecutor();
+        running = new AtomicBoolean(true);
+
+        executorService.execute(() -> {
+            while (running.get()) {
                 try {
-                    Runnable task = taskQueue.take();
-                    executorService.execute(task);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+                    Runnable task = taskQueue.poll(1, TimeUnit.SECONDS);
+                    if (task != null) {
+                        task.run();
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error processing task: " + e.getMessage(), e);
                 }
             }
         });
-        this.taskProcessingThread.start();
-
     }
 
     /**
@@ -46,26 +48,44 @@ public class DataThreadHandler {
      * @param runnable the runnable to queue
      */
     public void queue(Runnable runnable) {
-        if (this.taskQueue == null || this.executorService == null) {
-            throw new IllegalStateException("DataThreadHandler not initialized!");
+        if (taskQueue == null || executorService == null || running == null || !running.get()) {
+            throw new IllegalStateException("DataThreadHandler not initialized or already shut down!");
         }
-        this.taskQueue.add(runnable);
+        taskQueue.add(runnable);
     }
 
     /**
-     * Shuts down the executor service and waits for the task processing thread to finish.
+     * Shuts down the executor service and ensures task queue is processed gracefully before termination.
      */
     public void shutdown() {
-        if (this.taskQueue == null && this.executorService == null) {
-            throw new IllegalStateException("DataThreadHandler not initialized!");
+        if (taskQueue == null || executorService == null || running == null || !running.get()) {
+            throw new IllegalStateException("DataThreadHandler not initialized or already shut down!");
         }
+
+        System.out.println(taskQueue.size() + " tasks remaining in queue. Attempting shutdown...");
+        running.set(false);
+
+        // Drain any remaining tasks in the queue before shutting down
+        taskQueue.forEach(runnable -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                System.err.println("Error executing task during shutdown: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        taskQueue.clear();
+
+        executorService.shutdown();
         try {
-            this.taskProcessingThread.join();
+            if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                System.err.println("Executor did not terminate in the allocated time. Forcing shutdown...");
+                executorService.shutdownNow();
+            }
         } catch (InterruptedException e) {
+            System.err.println("Shutdown interrupted. Forcing shutdown...");
+            executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        this.executorService.shutdown();
     }
-
-
 }

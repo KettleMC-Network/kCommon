@@ -6,12 +6,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Table;
+import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 /**
  * A data handler that uses Hibernate to save and load entities
@@ -19,6 +21,8 @@ import java.util.function.Function;
  * @param <T> the type of entity
  */
 public class HibernateDataHandler<T> implements DataHandler<T> {
+
+    private static final Logger LOGGER = Logger.getLogger(HibernateDataHandler.class.getName());
 
     protected final Class<?> type;
     protected final String sqlHost;
@@ -49,6 +53,24 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
         this.sqlDatabase = sqlDatabase;
         this.sqlUser = sqlUser;
         this.sqlPassword = sqlPassword;
+
+        if (!this.type.isAnnotationPresent(Entity.class)) {
+            throw new IllegalArgumentException("Entity type must be annotated with @Entity");
+        }
+    }
+
+    /**
+     * Creates a new HibernateDataHandler
+     *
+     * @param type        the type of entity
+     * @param sqlHost     the sql host
+     * @param sqlPort     the sql port
+     * @param sqlDatabase the sql database
+     * @param sqlUser     the sql user
+     * @param sqlPassword the sql password
+     */
+    public HibernateDataHandler(Class<T> type, String sqlHost, String sqlPort, String sqlDatabase, String sqlUser, String sqlPassword) {
+        this(type, (id) -> null, sqlHost, sqlPort, sqlDatabase, sqlUser, sqlPassword);
     }
 
     @Override
@@ -79,12 +101,10 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
         this.dataThreadHandler.queue(() -> {
             Session session = this.sessionFactory.openSession();
             session.beginTransaction();
-            if (this.type.isAnnotationPresent(Table.class))
-                return;
 
-            String table = this.type.getAnnotation(Table.class).name();
+            String table = this.type.getAnnotation(Entity.class).name();
 
-            List<T> entities = session.createQuery("SELECT * FROM " + table + ";").list();
+            List<T> entities = session.createQuery("FROM " + table).list();
             if (entities == null || entities.isEmpty()) {
                 entities = new ArrayList<>();
             }
@@ -130,22 +150,30 @@ public class HibernateDataHandler<T> implements DataHandler<T> {
                     .setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect")
                     .setProperty("hibernate.show_sql", "false")
                     .setProperty("hibernate.hbm2ddl.auto", "update")
-                    .setProperty("hibernate.connection.pool_size", "1")
+                    .setProperty("hibernate.connection.provider_class", "com.zaxxer.hikari.hibernate.HikariConnectionProvider")
+                    .setProperty("hibernate.hikari.minimumIdle", "5")
+                    .setProperty("hibernate.hikari.maximumPoolSize", "15")
+                    .setProperty("hibernate.hikari.idleTimeout", "60000")
+                    .setProperty("hibernate.hikari.connectionTimeout", "30000")
+                    .setProperty("hibernate.hikari.maxLifetime", "1800000")
+                    .setProperty("hibernate.hikari.leakDetectionThreshold", "5000")
+                    .setProperty("hibernate.hikari.poolName", "HibernatePool-" + Math.abs(UUID.randomUUID().hashCode()))
                     .setProperty("hibernate.current_session_context_class", "thread")
                     .addAnnotatedClass(this.type);
 
-            // TODO: configuration.setImplicitNamingStrategy(DynamicNamingStrategy.of(this.tableNameFormat));
-
             this.sessionFactory = configuration.buildSessionFactory();
 
+            // Improved thread handler initialization to ensure it's not null in edge cases
             this.dataThreadHandler = new DataThreadHandler();
             this.dataThreadHandler.init();
             return true;
         } catch (HibernateException | IllegalStateException throwable) {
+            LOGGER.severe("Initialization failed: " + throwable.getMessage());
             throwable.printStackTrace();
             return false;
         }
     }
+
 
     @Override
     public void close() {
